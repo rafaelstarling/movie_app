@@ -1,6 +1,7 @@
 ﻿using MovieApplication.Domain.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MovieApplication.Infrastructure.Data
 {
@@ -12,6 +13,12 @@ namespace MovieApplication.Infrastructure.Data
         private readonly int _studiosColumnIndex;
         private readonly int _producersColumnIndex;
         private readonly int _winnerColumnIndex;
+
+        // os produtores e estúdios podem seguir os seguintes padrões:
+        // Produtor 1, Produtor 2
+        // Produtor 1 and Produtor 2
+        // Produtor 1, and Produtor 2
+        private static readonly Regex _splitRegex = new(@",\s(?:and\s)?|\sand\s");
 
         public LineParser(string configuration)
         {
@@ -59,7 +66,7 @@ namespace MovieApplication.Infrastructure.Data
 
         private static List<Studio> GetStudios(string studios)
         {
-            return studios.Split(",")
+            return _splitRegex.Split(studios)
                 .Select(studioName => new Studio()
                 {
                     Name = studioName.Trim(),
@@ -69,10 +76,10 @@ namespace MovieApplication.Infrastructure.Data
 
         private static List<Producer> GetProducers(string producers)
         {
-            return producers.Split(",")
-                .Select(studioName => new Producer()
+            return _splitRegex.Split(producers)
+                .Select(producerName => new Producer()
                 {
-                    Name = studioName.Trim(),
+                    Name = producerName.Trim(),
                 })
                 .ToList();
         }
